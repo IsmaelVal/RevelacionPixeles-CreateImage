@@ -3,8 +3,10 @@ python -m venv venv
 
 # Activarlo Mac
 source venv/bin/activate
-# Windows
+# Windows CMD
 .\venv\Scripts\activate
+# Windows PS
+.\venv\Scripts\Activate.ps1
 
 # Instalar dependencias
 pip install -r requirements.txt
