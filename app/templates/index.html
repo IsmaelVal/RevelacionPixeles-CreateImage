@@ -41,12 +41,9 @@
       background-color: rgb(128 255 128 / 91%);
       cursor: pointer;
     }
-    .cell.active.clicked {
-      background-color: rgba(255, 46, 46, 0.637);
-    }
     .cell.revealed {
-  pointer-events: none;
-  background-color: transparent !important;
+      pointer-events: none;
+      background-color: transparent !important;
     }
     img {
       display: block;
@@ -56,7 +53,6 @@
   </style>
 </head>
 <body>
-  
   <h1></h1>
   <div id="container">
     <img id="result-image" src="/uploads/result.png"
@@ -67,61 +63,55 @@
   </div>
 
   <script>
-  const image = document.getElementById('result-image');
-  const grid = document.getElementById('grid');
+    const image = document.getElementById('result-image');
+    const grid = document.getElementById('grid');
 
-  async function cargarMatriz() {
-    const res = await fetch('/matrix');
-    const matrix = await res.json();
-    const rows = matrix.length;
-    const cols = matrix[0].length;
-    const width = parseInt(image.dataset.width);
-    const height = parseInt(image.dataset.height);
+    async function cargarMatriz() {
+      const res = await fetch('/matrix');
+      const matrix = await res.json();
+      const rows = matrix.length;
+      const cols = matrix[0].length;
+      const width = parseInt(image.dataset.width);
+      const height = parseInt(image.dataset.height);
 
-    grid.innerHTML = '';
-    grid.style.gridTemplateRows = `repeat(${rows}, ${height/rows}px)`;
-    grid.style.gridTemplateColumns = `repeat(${cols}, ${width/cols}px)`;
+      grid.innerHTML = '';
+      grid.style.gridTemplateRows = `repeat(${rows}, ${height/rows}px)`;
+      grid.style.gridTemplateColumns = `repeat(${cols}, ${width/cols}px)`;
 
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        const cell = document.createElement('div');
-        cell.classList.add('cell');
-        if (matrix[i][j] === 1) {
-          cell.classList.add('active');
-          cell.addEventListener('click', async () => {
-            // 1) Obtener pregunta del servidor
-            const qRes = await fetch(`/questions/${i}/${j}`);
-            const qData = await qRes.json();
-            if (qData.error) {
-              alert(qData.error);
-              return;
-            }
-            // 2) Preguntar al usuario
-            const resp = prompt(qData.question);
-            if (resp !== null && resp.trim().toLowerCase() === qData.answer.trim().toLowerCase()) {
-              // 3) Avisar al servidor que revele esta celda
-              await fetch('/reveal', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ row: i, col: j })
-              });
-              // 4) Actualizar UI: quitar la máscara de esta casilla
-              cell.classList.remove('active');
-              cell.classList.add('revealed');
-              // 5) Recargar imagen con bust cache
-              image.src = `/uploads/result.png?t=${Date.now()}`;
-            } else {
-              alert('Respuesta incorrecta.');
-            }
-          });
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          if (matrix[i][j] === 1) {
+            cell.classList.add('active');
+            cell.addEventListener('click', async () => {
+              const qRes = await fetch(`/questions/${i}/${j}`);
+              const qData = await qRes.json();
+              if (qData.error) {
+                alert(qData.error);
+                return;
+              }
+              const resp = prompt(qData.question);
+              if (resp !== null && resp.trim().toLowerCase() === qData.answer.trim().toLowerCase()) {
+                await fetch('/reveal', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ row: i, col: j })
+                });
+                cell.classList.remove('active');
+                cell.classList.add('revealed');
+                image.src = `/uploads/result.png?t=${Date.now()}`;
+              } else {
+                alert('Respuesta incorrecta.');
+              }
+            });
+          }
+          grid.appendChild(cell);
         }
-        grid.appendChild(cell);
       }
     }
-  }
 
-  window.onload = cargarMatriz;
-</script>
-
+    window.onload = cargarMatriz;
+  </script>
 </body>
 </html>
