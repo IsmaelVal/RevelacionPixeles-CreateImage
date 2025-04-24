@@ -52,14 +52,12 @@
     <div id="grid"></div>
   </div>
 
-  <!-- Cliente Socket.IO -->
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
     const image = document.getElementById('result-image');
     const grid  = document.getElementById('grid');
     let ROWS, COLS;
 
-    // Función que reproduce un breve “beep”
     function playBeep() {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
@@ -74,10 +72,8 @@
       setTimeout(() => osc.stop(), 200);
     }
 
-    // Conexión WebSocket
     const socket = io();
 
-    // Cuando cualquier cliente revele un píxel
     socket.on('pixel_revealed', data => {
       const idx  = data.row * COLS + data.col;
       const cell = grid.children[idx];
@@ -85,12 +81,10 @@
         cell.classList.remove('active');
         cell.classList.add('revealed');
       }
-      // Refresca la imagen y suena el beep
       image.src = `/uploads/result.png?t=${Date.now()}`;
       playBeep();
     });
 
-    // Carga inicial del grid
     async function cargarMatriz() {
       const res    = await fetch('/matrix');
       const matrix = await res.json();
@@ -108,15 +102,22 @@
           if (matrix[i][j] === 1) {
             cell.classList.add('active');
             cell.addEventListener('click', async () => {
-              // Pide la pregunta
               const qRes  = await fetch(`/questions/${i}/${j}`);
               const qData = await qRes.json();
               if (qData.error) return;
 
-              // Prompt de validación
-              const resp = prompt(qData.question);
-              if (resp && resp.trim().toLowerCase() === qData.answer.trim().toLowerCase()) {
-                // Dispara el evento por WebSocket
+              const texto = [
+                qData.question,
+                `a) ${qData.options[0]}`,
+                `b) ${qData.options[1]}`,
+                `c) ${qData.options[2]}`,
+                `d) ${qData.options[3]}`,
+                "",
+                "Escribe la letra (a-d):"
+              ].join("\n");
+
+              const resp = prompt(texto);
+              if (resp && resp.trim().toLowerCase() === qData.correctOption) {
                 socket.emit('reveal_pixel', { row: i, col: j });
               }
             });

@@ -34,7 +34,6 @@ def serve_image(filename):
 
 @main.route("/questions/<int:row>/<int:col>")
 def get_question(row, col):
-    # Ahora ignoramos row/col y tomamos cualquiera del pool
     questions_path = os.path.join('app', Config.UPLOAD_FOLDER, "questions.json")
     if not os.path.exists(questions_path):
         return jsonify({"error": "No hay preguntas disponibles"}), 404
@@ -42,11 +41,8 @@ def get_question(row, col):
     with open(questions_path, "r", encoding="utf-8") as f:
         pool = json.load(f)
 
-    if not isinstance(pool, list) or not pool:
-        return jsonify({"error": "Formato de preguntas inválido"}), 500
-
-    q = random.choice(pool)
-    return jsonify(q)
+    pregunta = random.choice(pool)
+    return jsonify(pregunta)
 
 # --------------------------------------------------------------------------------
 # NUEVO: manejador SocketIO para revelar píxel
