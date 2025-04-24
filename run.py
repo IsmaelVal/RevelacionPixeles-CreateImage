@@ -1,13 +1,7 @@
-from app import init_app
-from config import Config
-from flask_socketio import SocketIO
+from app import init_app, socketio
 
 app = init_app()
-app.config.from_object(Config)
-
-# Inicializa SocketIO
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 if __name__ == "__main__":
-    # Usamos eventlet para concurrencia
+    # Arrancamos con socketio.run en lugar de app.run
     socketio.run(app, debug=True)

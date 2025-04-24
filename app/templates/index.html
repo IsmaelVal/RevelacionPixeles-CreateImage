@@ -5,15 +5,11 @@
   <title>Máscara con cuadrícula</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column; align-items: center;
       font-family: sans-serif;
       background: linear-gradient(135deg, #1f1f1f, #a3242b, #2c3e50);
-      color: #eee;
-      min-height: 100vh;
+      color: #eee; min-height: 100vh;
     }
     #container {
       position: relative;
@@ -56,13 +52,14 @@
     <div id="grid"></div>
   </div>
 
+  <!-- Cliente Socket.IO -->
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
     const image = document.getElementById('result-image');
     const grid  = document.getElementById('grid');
     let ROWS, COLS;
 
-    // Beep corto con Web Audio API
+    // Función que reproduce un breve “beep”
     function playBeep() {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
@@ -80,6 +77,7 @@
     // Conexión WebSocket
     const socket = io();
 
+    // Cuando cualquier cliente revele un píxel
     socket.on('pixel_revealed', data => {
       const idx  = data.row * COLS + data.col;
       const cell = grid.children[idx];
@@ -87,10 +85,12 @@
         cell.classList.remove('active');
         cell.classList.add('revealed');
       }
+      // Refresca la imagen y suena el beep
       image.src = `/uploads/result.png?t=${Date.now()}`;
       playBeep();
     });
 
+    // Carga inicial del grid
     async function cargarMatriz() {
       const res    = await fetch('/matrix');
       const matrix = await res.json();
@@ -108,21 +108,16 @@
           if (matrix[i][j] === 1) {
             cell.classList.add('active');
             cell.addEventListener('click', async () => {
+              // Pide la pregunta
               const qRes  = await fetch(`/questions/${i}/${j}`);
               const qData = await qRes.json();
               if (qData.error) return;
 
+              // Prompt de validación
               const resp = prompt(qData.question);
               if (resp && resp.trim().toLowerCase() === qData.answer.trim().toLowerCase()) {
-                await fetch('/reveal', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ row: i, col: j })
-                });
-                cell.classList.remove('active');
-                cell.classList.add('revealed');
-                image.src = `/uploads/result.png?t=${Date.now()}`;
-                playBeep();
+                // Dispara el evento por WebSocket
+                socket.emit('reveal_pixel', { row: i, col: j });
               }
             });
           }
