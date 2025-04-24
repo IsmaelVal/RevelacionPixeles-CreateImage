@@ -16,84 +16,104 @@
       min-height: 100vh;
     }
     #container {
-      overflow: hidden;
       position: relative;
-      display: inline-block;
       width: {{ width }}px;
       height: {{ height }}px;
+      overflow: hidden;
     }
     #grid {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       display: grid;
       pointer-events: none;
-      width: {{ width }}px;
-      height: {{ height }}px;
     }
     .cell {
       box-sizing: border-box;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .cell.active {
       pointer-events: auto;
     }
     .cell.active:hover {
-      background-color: rgb(128 255 128 / 91%);
+      background-color: rgba(128,255,128,0.9);
       cursor: pointer;
     }
     .cell.revealed {
       pointer-events: none;
       background-color: transparent !important;
     }
-    img {
+    #result-image {
       display: block;
-      width: {{ width }}px;
-      height: {{ height }}px;
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
 <body>
-  <h1></h1>
+
   <div id="container">
-    <img id="result-image" src="/uploads/result.png"
-         alt="Imagen procesada"
-         data-width="{{ width }}"
-         data-height="{{ height }}">
+    <img id="result-image" src="/uploads/result.png" alt="Imagen enmascarada">
     <div id="grid"></div>
   </div>
 
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
     const image = document.getElementById('result-image');
-    const grid = document.getElementById('grid');
+    const grid  = document.getElementById('grid');
+    let ROWS, COLS;
+
+    // Beep corto con Web Audio API
+    function playBeep() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 440;
+      osc.start();
+      gain.gain.setValueAtTime(1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      setTimeout(() => osc.stop(), 200);
+    }
+
+    // Conexión WebSocket
+    const socket = io();
+
+    socket.on('pixel_revealed', data => {
+      const idx  = data.row * COLS + data.col;
+      const cell = grid.children[idx];
+      if (cell) {
+        cell.classList.remove('active');
+        cell.classList.add('revealed');
+      }
+      image.src = `/uploads/result.png?t=${Date.now()}`;
+      playBeep();
+    });
 
     async function cargarMatriz() {
-      const res = await fetch('/matrix');
+      const res    = await fetch('/matrix');
       const matrix = await res.json();
-      const rows = matrix.length;
-      const cols = matrix[0].length;
-      const width = parseInt(image.dataset.width);
-      const height = parseInt(image.dataset.height);
+      ROWS = matrix.length;
+      COLS = matrix[0].length;
 
+      grid.style.gridTemplateRows    = `repeat(${ROWS}, 1fr)`;
+      grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
       grid.innerHTML = '';
-      grid.style.gridTemplateRows = `repeat(${rows}, ${height/rows}px)`;
-      grid.style.gridTemplateColumns = `repeat(${cols}, ${width/cols}px)`;
 
-      for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
+      for (let i = 0; i < ROWS; i++) {
+        for (let j = 0; j < COLS; j++) {
           const cell = document.createElement('div');
           cell.classList.add('cell');
           if (matrix[i][j] === 1) {
             cell.classList.add('active');
             cell.addEventListener('click', async () => {
-              const qRes = await fetch(`/questions/${i}/${j}`);
+              const qRes  = await fetch(`/questions/${i}/${j}`);
               const qData = await qRes.json();
-              if (qData.error) {
-                alert(qData.error);
-                return;
-              }
+              if (qData.error) return;
+
               const resp = prompt(qData.question);
-              if (resp !== null && resp.trim().toLowerCase() === qData.answer.trim().toLowerCase()) {
+              if (resp && resp.trim().toLowerCase() === qData.answer.trim().toLowerCase()) {
                 await fetch('/reveal', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -102,8 +122,7 @@
                 cell.classList.remove('active');
                 cell.classList.add('revealed');
                 image.src = `/uploads/result.png?t=${Date.now()}`;
-              } else {
-                alert('Respuesta incorrecta.');
+                playBeep();
               }
             });
           }
