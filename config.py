@@ -7,6 +7,6 @@ load_dotenv()
 
 class Config:
     UPLOAD_FOLDER = 'uploads'
-    ROWS = 80
-    COLS = 80
+    ROWS = 16
+    COLS = 16
     PROBABILITY = 0.95

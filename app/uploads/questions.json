@@ -1,11 +1,82 @@
 {
-    "0,0": {
-      "question": "¿Cuál es la capital de México?",
-      "answer": "ciudad de méxico"
-    },
-    "0,1": {
-      "question": "¿En qué año llegó el hombre a la Luna?",
-      "answer": "1969"
-    }
+  "0,2": {
+    "question": "¿Cuál es la capital de Argentina?",
+    "answer": "buenos aires"
+  },
+  "0,3": {
+    "question": "¿Cuál es el símbolo químico del agua?",
+    "answer": "h2o"
+  },
+  "0,4": {
+    "question": "¿Quién escribió 'Don Quijote de la Mancha'?",
+    "answer": "miguel de cervantes"
+  },
+  "0,5": {
+    "question": "¿Qué planeta es conocido como el Planeta Rojo?",
+    "answer": "marte"
+  },
+  "0,6": {
+    "question": "¿En qué año se declaró la independencia de México?",
+    "answer": "1810"
+  },
+  "0,7": {
+    "question": "¿Quién pintó 'La Última Cena'?",
+    "answer": "leonardo da vinci"
+  },
+  "0,8": {
+    "question": "¿En qué continente se encuentra Egipto?",
+    "answer": "africa"
+  },
+  "0,9": {
+    "question": "¿Cuál es la montaña más alta del mundo?",
+    "answer": "everest"
+  },
+  "0,10": {
+    "question": "¿Quién inventó el teléfono?",
+    "answer": "alexander graham bell"
+  },
+  "0,11": {
+    "question": "¿Cuál es el océano más grande del mundo?",
+    "answer": "oceano pacifico"
+  },
+  "0,12": {
+    "question": "¿Cuál es la moneda oficial de Japón?",
+    "answer": "yen"
+  },
+  "0,13": {
+    "question": "¿Quién escribió 'Cien años de soledad'?",
+    "answer": "gabriel garcia marquez"
+  },
+  "0,14": {
+    "question": "¿Qué elemento químico tiene el número atómico 6?",
+    "answer": "carbono"
+  },
+  "0,15": {
+    "question": "¿Cuál es la capital de Francia?",
+    "answer": "paris"
+  },
+  "0,16": {
+    "question": "¿Cuál es el desierto más grande del mundo?",
+    "answer": "antartida"
+  },
+  "0,17": {
+    "question": "¿Quién compuso la Novena Sinfonía?",
+    "answer": "ludwig van beethoven"
+  },
+  "0,18": {
+    "question": "¿Cuál es el órgano más grande del cuerpo humano?",
+    "answer": "piel"
+  },
+  "0,19": {
+    "question": "¿Cuál es la capital de Perú?",
+    "answer": "lima"
+  },
+  "0,20": {
+    "question": "¿Quién inventó la bombilla eléctrica?",
+    "answer": "thomas edison"
+  },
+  "0,21": {
+    "question": "¿En qué año cayó el Muro de Berlín?",
+    "answer": "1989"
   }
-  
+}
