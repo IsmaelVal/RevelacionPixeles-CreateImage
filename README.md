@@ -11,6 +11,9 @@ source venv/bin/activate
 # Instalar dependencias
 pip install -r requirements.txt
 
+# Requerimientos socked
+pip install flask-socketio eventlet
+
 # Correr app
 python run.py
 

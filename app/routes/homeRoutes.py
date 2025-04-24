@@ -1,12 +1,13 @@
 import os
 import json
+import random
 from flask import Blueprint, render_template, send_file, jsonify, request
 from config import Config
 from app.services.grid_service import (
     reset_grid, reveal_cell, exists_grid, image_info
 )
-from app import socketio              # <-- importamos socketio
-from flask_socketio import emit       # <-- para emitir eventos
+from app import socketio
+from flask_socketio import emit
 
 main = Blueprint("home_blueprint", __name__)
 
@@ -33,15 +34,18 @@ def serve_image(filename):
 
 @main.route("/questions/<int:row>/<int:col>")
 def get_question(row, col):
+    # Ahora ignoramos row/col y tomamos cualquiera del pool
     questions_path = os.path.join('app', Config.UPLOAD_FOLDER, "questions.json")
     if not os.path.exists(questions_path):
-        return jsonify({"error": "No hay archivo de preguntas"}), 404
-    with open(questions_path, "r") as f:
-        questions = json.load(f)
-    key = f"{row},{col}"
-    q = questions.get(key)
-    if not q:
-        return jsonify({"error": "Pregunta no encontrada"}), 404
+        return jsonify({"error": "No hay preguntas disponibles"}), 404
+
+    with open(questions_path, "r", encoding="utf-8") as f:
+        pool = json.load(f)
+
+    if not isinstance(pool, list) or not pool:
+        return jsonify({"error": "Formato de preguntas inválido"}), 500
+
+    q = random.choice(pool)
     return jsonify(q)
 
 # --------------------------------------------------------------------------------
